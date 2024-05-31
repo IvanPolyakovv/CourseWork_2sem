@@ -1,0 +1,643 @@
+#include <fstream>
+#include <iostream>
+#include <queue>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct Node
+{
+    int key;
+    Node* left;
+    Node* right;
+    Node(int key)
+    {
+        this->key = key;
+        this->left = this->right = nullptr;
+    }
+};
+struct Trunk
+{
+    Trunk* previous;
+    string str;
+
+    Trunk(Trunk* previous, string str)
+    {
+        this->previous = previous;
+        this->str = str;
+    }
+};
+
+struct BinaryTree
+{
+    Node* root = NULL;
+    int size = 0;
+
+    void insert(int key)
+    {
+        if (root) {
+            insert(key, root);
+        }
+        else {
+            root = new Node(key);
+            root->key = key;
+            root->left = NULL;
+            root->right = NULL;
+        }
+    }
+
+    void destroy() 
+    { 
+        destroyTree(root); 
+    }
+
+    void show() 
+    { 
+        printTree(root, NULL, false); 
+    }
+
+    void readFromFile()
+    {
+        ifstream array;
+        array.open("Array.txt");
+        if (array.is_open()) 
+        {
+            int i;
+            vector<int> arr;
+            while (!array.eof()) 
+            {
+                array >> i;
+                arr.push_back(i);
+            }
+            for (int n : arr) 
+            {
+                insert(n);
+            }
+        }
+        array.close();
+    }
+
+    int search(int key)
+    {
+        search(key, root);
+        if (search(key, root) != NULL) {
+            cout << "This number is in tree" << '\n';
+            return 1;
+        }
+        cout << "This number is not in tree" << '\n';
+        return 0;
+    }
+
+    void findMin() 
+    { 
+        cout << "Minimum: " << findMin(root)->key << '\n'; 
+    }
+
+    void findMax() 
+    { 
+        cout << "Maximum: " << findMax(root)->key << '\n'; 
+    }
+
+    void deleteKey(int item) 
+    { 
+        deleteKey(root, item); 
+    }
+
+    void sizeTree()
+    {
+        sizeTree(root);
+        cout << "Dimension of binary tree: " << size << '\n';
+    }
+
+    void directBypass() 
+    { 
+        directBypass(root); 
+    }
+
+    void reverseBypass() 
+    { 
+        reverseBypass(root); 
+    }
+
+    void widthBypass() 
+    { 
+        widthBypass(root); 
+    }
+
+    void printInFile(string r)
+    {
+        ofstream output(r);
+        printTree(root, NULL, false, output);
+        output.close();
+    }
+
+    void insert(int key, Node* leaf)
+    {
+        if (key < leaf->key) 
+        {
+            if (leaf->left != NULL) 
+            {
+                insert(key, leaf->left);
+            }
+            else 
+            {
+                leaf->left = new Node(key);
+                leaf->left->key = key;
+                leaf->left->left = NULL;
+                leaf->left->right = NULL;
+            }
+        }
+        else 
+        {
+            if (leaf->right != NULL) 
+            {
+                insert(key, leaf->right);
+            }
+            else 
+            {
+                leaf->right = new Node(key);
+                leaf->right->key = key;
+                leaf->right->left = NULL;
+                leaf->right->right = NULL;
+            }
+        }
+    }
+
+    void destroyTree(Node* leaf)
+    {
+        if (leaf) 
+        {
+            destroyTree(leaf->left);
+            destroyTree(leaf->right);
+            delete leaf;
+        }
+    }
+
+    Node* deleteKey(Node* leaf, int item)
+    {
+        if (leaf->key == item) 
+        {
+            if (leaf->left == NULL && leaf->right == NULL) 
+            {
+                return NULL;
+            }
+            if (leaf->left == NULL) 
+            {
+                return leaf->right;
+            }
+            if (leaf->right == NULL) 
+            {
+                return leaf->left;
+            }
+            const Node* minNodeInRightTree = findMin(leaf->right);
+            leaf->key = minNodeInRightTree->key;
+            leaf->right = deleteKey(leaf->right, minNodeInRightTree->key);
+            return leaf;
+        }
+        if (item < leaf->key) 
+        {
+            if (leaf->left == NULL) 
+            {
+                cout << "The element is not in tree " << "\n";
+                return leaf;
+            }
+            leaf->left = deleteKey(leaf->left, item);
+            return leaf;
+        }
+        if (item > leaf->key) 
+        {
+            if (leaf->right == NULL) 
+            {
+                cout << "The element is not in tree" << '\n';
+                return leaf;
+            }
+            leaf->right = deleteKey(leaf->right, item);
+            return leaf;
+        }
+    }
+
+    Node* search(int key, Node* leaf)
+    {
+        if (leaf) 
+        {
+            if (key == leaf->key) 
+            {
+                return leaf;
+            }
+            if (key < leaf->key) 
+            {
+                return search(key, leaf->left);
+            }
+            else 
+            {
+                return search(key, leaf->right);
+            }
+        }
+        else 
+        {
+            return NULL;
+        }
+    }
+
+    Node* findMin(Node* leaf)
+    {
+        if (leaf->left == NULL) 
+        {
+            return leaf;
+        }
+        return findMin(leaf->left);
+    }
+
+    Node* findMax(Node* leaf)
+    {
+        if (leaf->right == NULL) 
+        {
+            return leaf;
+        }
+        return findMax(leaf->right);
+    }
+
+    void sizeTree(Node* leaf)
+    {
+        if (leaf) 
+        {
+            size++;
+            sizeTree(leaf->left);
+            sizeTree(leaf->right);
+        }
+    }
+
+    void directBypass(Node* leaf)
+    {
+        if (leaf) 
+        {
+            cout << leaf->key << ' ';
+            directBypass(leaf->left);
+            directBypass(leaf->right);
+        }
+    }
+
+    void reverseBypass(Node* leaf)
+    {
+        if (leaf) 
+        {
+            reverseBypass(leaf->left);
+            reverseBypass(leaf->right);
+            cout << leaf->key << ' ';
+        }
+    }
+
+    void widthBypass(Node* leaf)
+    {
+        queue<Node*> nodeQueue;
+        nodeQueue.push(leaf);
+        while (!nodeQueue.empty()) 
+        {
+            leaf = nodeQueue.front();
+            cout << leaf->key << ' ';
+            nodeQueue.pop();
+            if (leaf->left) 
+            {
+                nodeQueue.push(leaf->left);
+            }
+            if (leaf->right) 
+            {
+                nodeQueue.push(leaf->right);
+            }
+        }
+    }
+
+    void showTrunks(Trunk* p)
+    {
+        if (p == NULL) 
+        {
+            return;
+        }
+
+        showTrunks(p->previous);
+        cout << p->str;
+    }
+
+    void printTree(Node* leaf, Trunk* previous, bool isRight)
+    {
+        if (leaf == NULL) 
+        {
+            return;
+        }
+
+        string previousStr = "    ";
+        Trunk* trunk = new Trunk(previous, previousStr);
+
+        printTree(leaf->right, trunk, true);
+
+        if (!previous) 
+        {
+            trunk->str = "——>";
+        }
+        else if (isRight) 
+        {
+            trunk->str = ".——>";
+            previousStr = "   |";
+        }
+        else 
+        {
+            trunk->str = "`-—>";
+            previous->str = previousStr;
+        }
+
+        showTrunks(trunk);
+        cout << " " << leaf->key << '\n';
+
+        if (previous) 
+        {
+            previous->str = previousStr;
+        }
+        trunk->str = "   |";
+
+        printTree(leaf->left, trunk, false);
+    }
+
+    void printTree(Node* leaf, Trunk* previous, bool isRight, ofstream& f2)
+    {
+        if (leaf == NULL)
+            return;
+        string previousStr = "    ";
+        Trunk* trunk = new Trunk(previous, previousStr);
+        printTree(leaf->right, trunk, true, f2);
+        if (!previous) 
+        {
+            trunk->str = "-->";
+        }
+        else if (isRight) 
+        {
+            trunk->str = ".-->";
+            previousStr = "   |";
+        }
+        else 
+        {
+            trunk->str = "`-->";
+            previous->str = previousStr;
+        }
+
+        showTrunk(trunk, f2);
+        f2 << leaf->key << '\n';
+
+        if (previous) 
+        {
+            previous->str = previousStr;
+        }
+        trunk->str = "   |";
+        printTree(leaf->left, trunk, false, f2);
+    }
+    void showTrunk(Trunk* p, ofstream& f2)
+    {
+        if (p == NULL)
+            return;
+        showTrunk(p->previous, f2);
+        f2 << p->str;
+    }
+};
+
+void clear(string File)
+{
+    ofstream file(File);
+    file << "";
+    file.close();
+}
+
+BinaryTree createTreeRandomVector(ofstream& output_ans)
+{
+    vector<int> numb;
+    int arraySize = rand() % 150;
+    for (int k = 0; k < arraySize; k++) 
+    {
+        int elemMas = rand() % (198) - 99;
+        numb.push_back(elemMas);
+    }
+    BinaryTree newTree;
+    for (int n : numb) 
+    {
+        newTree.insert(n);
+    }
+    newTree.printTree(newTree.root, NULL, false, output_ans);
+    return newTree;
+}
+
+void printMenu()
+{
+    system("cls");
+    cout << "1. Print the tree in console and in file" << '\n';
+    cout << "2. Add new element" << '\n';
+    cout << "3. Delete element" << '\n';
+    cout << "4. Search element" << '\n';
+    cout << "5. Straight bypass" << '\n';
+    cout << "6. Reverse bypass" << '\n';
+    cout << "7. Bypass at width" << '\n';
+    cout << "8. Excercises generation" << '\n';
+    cout << "9. Exit" << '\n';
+}
+
+void menu()
+{
+    int variant;
+    srand(time(0));
+    BinaryTree tree;
+    BinaryTree binaryTree1;
+    ofstream outputKey("outputKey.txt", ios::app);
+    ofstream outputTask("outputTask.txt", ios::app);
+    ofstream outputAns("outputAns.txt", ios::app);
+    clear("outputKey.txt");
+    clear("outputAns.txt");
+    clear("outputTask.txt");
+    int n;
+    int var;
+    vector<int> numb;
+    vector<int> numbers;
+    cout << "1. Independently fill" << '\n';
+    cout << "2. Automatically fill" << '\n';
+    cout << "3. Fill at file" << '\n';
+    cin >> var;
+    switch (var) 
+    {
+    case 1:
+        int number;
+        cout << "Enter the numbers before -100000" << '\n';
+        cin >> number;
+        while (number != -100000) 
+        {
+            numbers.push_back(number);
+            cin >> number;
+        }
+        for (int i : numbers) 
+        {
+            binaryTree1.insert(i);
+        }
+        break;
+    case 2:
+        cout << "Enter the dimension: ";
+        cin >> n;
+        cout << '\n';
+        for (int i = 0; i < n; i++) 
+        {
+            int data = rand() % (199) - 99;
+            binaryTree1.insert(data);
+        }
+        break;
+    case 3:
+        binaryTree1.readFromFile();
+        break;
+    }
+    do 
+    {
+        printMenu();
+        int value;
+        cin >> variant;
+        switch (variant) 
+        {
+        case 1:
+            binaryTree1.show();
+            binaryTree1.printInFile("output.txt");
+            break;
+        case 2:
+            cout << '\n' << "Enter the number to add: ";
+            cin >> value;
+            binaryTree1.insert(value);
+            break;
+        case 3:
+            cout << '\n' << "Enter the number to delete: ";
+            cin >> value;
+            binaryTree1.deleteKey(value);
+            break;
+        case 4:
+            cout << '\n' << "Enter the number to search: ";
+            cin >> value;
+            binaryTree1.search(value);
+            break;
+        case 5:
+            cout << "Straight bypass: " << '\n';
+            binaryTree1.directBypass();
+            break;
+        case 6:
+            cout << "Reverse bypass: " << '\n';
+            binaryTree1.reverseBypass();
+            break;
+        case 7:
+            cout << "Bypass at wight: " << '\n';
+            binaryTree1.widthBypass();
+            break;
+        case 8:
+            int n;
+            BinaryTree* pTree = NULL;
+            cout << "The number of excercises: ";
+            cin >> n;
+            for (int i = 0; i < n; i++) 
+            {
+                int v = rand() % 3;
+                int arraySize;
+                int elem;
+                switch (v) 
+                {
+                case 0:
+                    outputTask << i << ") Creature of binary tree" << '\n';
+                    outputKey << i << ") The tree was created" << '\n';
+                    outputAns << i << ") Tree: " << '\n';
+                    tree = createTreeRandomVector(outputAns);
+                    pTree = &tree;
+                    outputAns << '\n';
+                    break;
+                case 1:
+                    if (pTree) 
+                    {
+                        outputTask << i << ") Deleting of binary tree element " << '\n';
+                        elem = rand() % (198) - 99;
+                        tree.deleteKey(elem);
+                        if (tree.search(elem) != 0) 
+                        {
+                            outputKey << i << ") The element " << elem << " was deleted" << '\n';
+                            outputAns << i << ") The element " << elem << " was deleted, tree:" << '\n';
+                            tree.printTree(tree.root, NULL, false, outputAns);
+                            outputAns << '\n';
+                        }
+                        else 
+                        {
+                            outputKey << i << ") The element " << elem << " was not deleted, error" << '\n';
+                            outputAns << i << ") The element " << elem << " was not deleted, error" << '\n';
+                        }
+                        break;
+                    }
+                    else 
+                    {
+                        outputTask << i << ") Deleting the element " << '\n';
+                        outputKey << i << ") The tree will be created automatically, because it's not created" << '\n';
+                        outputAns << i << ") The tree will be created automatically, because it's not created" << '\n';
+                        outputAns << "The binary tree: " << '\n';
+                        tree = createTreeRandomVector(outputAns);
+                        pTree = &tree;
+                        outputAns << '\n';
+                        elem = rand() % (198) - 99;
+                        tree.deleteKey(elem);
+                        if (tree.search(elem) != 0) 
+                        {
+                            outputKey << "The element " << elem << " was deleted" << '\n';
+                            outputAns << "The element " << elem << " was deleted, tree:" << '\n';
+                            tree.printTree(tree.root, NULL, false, outputAns);
+                            outputAns << '\n';
+                        }
+                        else 
+                        {
+                            outputKey << "The element " << elem << " wasn't deleted, because there isn't this element in tree" << '\n';
+                            outputAns << "The element " << elem << " wasn't deleted, because there isn't this element in tree" << '\n';
+                        }
+                        break;
+                    }
+
+                case 2:
+                    if (pTree) 
+                    {
+                        outputTask << i << ") Adding element in tree " << '\n';
+                        elem = rand() % (198) - 99;
+                        tree.insert(elem);
+                        outputKey << i << ") The element " << elem << " was added"<< '\n';
+                        outputAns << i << ") the element " << elem << " was added, tree: " << '\n';
+                        tree.printTree(tree.root, NULL, false, outputAns);
+                        outputAns << '\n';
+                        break;
+                    }
+                    else 
+                    {
+                        outputTask << i << ") Adding element in tree " << '\n';
+                        outputKey << i << ") The tree will be created automatically, because it's not created" << '\n';
+                        outputAns << i << ") The tree will be created automatically, because it's not created" << '\n';
+                        outputAns << "The tree: " << '\n';
+                        tree = createTreeRandomVector(outputAns);
+                        pTree = &tree;
+                        outputAns << '\n';
+                        elem = rand() % (198) - 99;
+                        tree.insert(elem);
+                        outputKey << "The element " << elem << "was added" << '\n';
+                        outputAns << "The element " << elem << " was added, tree: " << '\n';
+                        tree.printTree(tree.root, NULL, false, outputAns);
+                        outputAns << '\n';
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        if (variant != 9)
+            system("pause");
+    } while (variant != 9);
+    binaryTree1.destroy();
+    tree.destroy();
+    outputAns.close();
+    outputKey.close();
+    outputTask.close();
+}
+
+int main()
+{
+    setlocale(0, "");
+    srand(time(0));
+    menu();
+    clear("output.txt");
+}
